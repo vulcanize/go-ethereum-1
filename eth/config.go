@@ -24,6 +24,8 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/ethereum/go-ethereum/ethdb/postgres"
+
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/consensus/ethash"
 	"github.com/ethereum/go-ethereum/core"
@@ -147,4 +149,7 @@ type Config struct {
 
 	// MuirGlacier block override (TODO: remove after the fork)
 	OverrideMuirGlacier *big.Int
+
+	// Config params for Postgres database
+	PostgresConfig *postgres.Config
 }
