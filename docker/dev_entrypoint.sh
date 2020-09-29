@@ -40,5 +40,8 @@ else
       --txingestion.dbhost=$TX_INGESTION_DB_HOST \
       --txingestion.pollinterval=$TX_INGESTION_POLL_INTERVAL \
       --txingestion.dbuser=$TX_INGESTION_DB_USER \
-      --txingestion.dbpassword=$TX_INGESTION_DB_PASSWORD
+      --txingestion.dbpassword=$TX_INGESTION_DB_PASSWORD \
+      --postrges $POSTGRES_ETHDB \
+      --postgres.hostname $POSTGRES_HOST \
+      --postgres.database $POSTGRES_DATABASE
 fi
