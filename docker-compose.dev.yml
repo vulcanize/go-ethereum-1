@@ -17,6 +17,8 @@ services:
       - HOSTNAME=geth_l2
       - PORT=8545
       - NETWORK_ID=108
+      - POSTGRES_DATABASE=rollup
+      - POSTGRES_HOST=postgres
     ports:
       - 8545:8545
 

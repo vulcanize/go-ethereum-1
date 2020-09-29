@@ -31,4 +31,7 @@ geth --dev \
   --targetgaslimit $TARGET_GAS_LIMIT \
   --nousb \
   --gcmode=archive \
-  --verbosity "6"
+  --verbosity "6" \
+  --postgres \
+  --postgres.hostname $POSTGRES_HOST \
+  --postgres.database $POSTGRES_DATABASE
