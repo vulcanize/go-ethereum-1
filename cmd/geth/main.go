@@ -212,8 +212,6 @@ func init() {
 		licenseCommand,
 		// See config.go
 		dumpConfigCommand,
-		// See retesteth.go
-		retestethCommand,
 	}
 	sort.Sort(cli.CommandsByName(app.Commands))
 
