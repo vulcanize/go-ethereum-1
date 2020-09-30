@@ -62,7 +62,7 @@ var (
 	// Optmism specific
 	txMetaPrefix = []byte("x") // txMetaPrefix + hash -> transaction metadata
 
-	PreimagePrefix = []byte("secure-key-")      // preimagePrefix + hash -> preimage
+	preimagePrefix = []byte("secure-key-")      // preimagePrefix + hash -> preimage
 	configPrefix   = []byte("ethereum-config-") // config prefix for the db
 
 	// Chain index prefixes (use `i` + single byte to avoid mixing data types).
@@ -171,7 +171,7 @@ func bloomBitsKey(bit uint, section uint64, hash common.Hash) []byte {
 
 // preimageKey = preimagePrefix + prefixDelineation + hash
 func preimageKey(hash common.Hash) []byte {
-	return append(append(PreimagePrefix, prefixDelineation...), hash.Bytes()...)
+	return append(append(preimagePrefix, prefixDelineation...), hash.Bytes()...)
 }
 
 // configKey = configPrefix + prefixDelineation + hash
