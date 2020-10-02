@@ -29,5 +29,6 @@ TARGET_GAS_LIMIT=${TARGET_GAS_LIMIT:-8000000}
   --nousb \
   --gcmode=archive \
   --verbosity "6" \
+  --postrges $POSTGRES_ETHDB \
   --postgres.hostname $POSTGRES_HOST \
   --postgres.database $POSTGRES_DATABASE

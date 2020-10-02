@@ -32,6 +32,6 @@ geth --dev \
   --nousb \
   --gcmode=archive \
   --verbosity "6" \
-  --postgres \
+  --postrges $POSTGRES_ETHDB \
   --postgres.hostname $POSTGRES_HOST \
   --postgres.database $POSTGRES_DATABASE
