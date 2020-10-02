@@ -740,7 +740,7 @@ var (
 	PostgresHostnameFlag = cli.StringFlag{
 		Name:  "postgres.hostname",
 		Usage: "Hostname for the Postgres database",
-		Value: "localhost",
+		Value: "postgres",
 	}
 	PostgresPortFlag = cli.IntFlag{
 		Name:  "postgres.port",
@@ -760,7 +760,7 @@ var (
 	PostgresDatabaseNameFlag = cli.StringFlag{
 		Name:  "postgres.database",
 		Usage: "Name for the Postgres database",
-		Value: "geth",
+		Value: "rollup",
 	}
 	PostgresMaxOpenConnectionsFlag = cli.IntFlag{
 		Name:  "postgres.maxopen",
@@ -1683,7 +1683,11 @@ func SplitTagsFlag(tagsFlag string) map[string]string {
 
 // MakeChainDatabase open an LevelDB using the flags passed to the client and will hard crash if it fails.
 func MakeChainDatabase(ctx *cli.Context, stack *node.Node) ethdb.Database {
-	chainDb, err := stack.OpenDatabaseWithCleaner()
+	var (
+		cache   = ctx.GlobalInt(CacheFlag.Name) * ctx.GlobalInt(CacheDatabaseFlag.Name) / 100
+		handles = makeDatabaseHandles()
+	)
+	chainDb, err := stack.OpenDatabaseWithFreezer("chaindata", cache, handles, ctx.GlobalString(AncientFlag.Name), "")
 	if err != nil {
 		Fatalf("Could not open database: %v", err)
 	}
