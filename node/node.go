@@ -28,8 +28,6 @@ import (
 
 	"github.com/ethereum/go-ethereum/core/rawdb"
 
-	"github.com/ethereum/go-ethereum/ethdb/postgres"
-
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/ethereum/go-ethereum/event"
@@ -611,11 +609,7 @@ func (n *Node) EventMux() *event.TypeMux {
 // ephemeral, a memory database is returned.
 func (n *Node) OpenDatabase(name string, cache int, handles int, namespace string) (ethdb.Database, error) {
 	if n.config.PostgresConfig != nil {
-		db, err := postgres.NewDB(n.config.PostgresConfig)
-		if err != nil {
-			return nil, err
-		}
-		return postgres.NewDatabase(db), nil
+		return rawdb.NewDatabaseWithCleaner(n.config.PostgresConfig, n.config.ResolvePath(name), cache, handles, namespace)
 	}
 	if n.config.DataDir == "" {
 		return rawdb.NewMemoryDatabase(), nil
@@ -630,7 +624,7 @@ func (n *Node) OpenDatabase(name string, cache int, handles int, namespace strin
 // memory database is returned.
 func (n *Node) OpenDatabaseWithFreezer(name string, cache, handles int, freezer, namespace string) (ethdb.Database, error) {
 	if n.config.PostgresConfig != nil {
-		return rawdb.NewDatabaseWithCleaner(n.config.PostgresConfig)
+		return rawdb.NewDatabaseWithCleaner(n.config.PostgresConfig, n.config.ResolvePath(name), cache, handles, namespace)
 	}
 	if n.config.DataDir == "" {
 		return rawdb.NewMemoryDatabase(), nil

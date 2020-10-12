@@ -22,8 +22,6 @@ import (
 
 	"github.com/ethereum/go-ethereum/core/rawdb"
 
-	"github.com/ethereum/go-ethereum/ethdb/postgres"
-
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/ethereum/go-ethereum/event"
@@ -46,11 +44,7 @@ type ServiceContext struct {
 // node is an ephemeral one, a memory database is returned.
 func (ctx *ServiceContext) OpenDatabase(name string, cache int, handles int, namespace string) (ethdb.Database, error) {
 	if ctx.config.PostgresConfig != nil {
-		db, err := postgres.NewDB(ctx.config.PostgresConfig)
-		if err != nil {
-			return nil, err
-		}
-		return postgres.NewDatabase(db), nil
+		return rawdb.NewDatabaseWithCleaner(ctx.config.PostgresConfig, ctx.config.ResolvePath(name), cache, handles, namespace)
 	}
 	if ctx.config.DataDir == "" {
 		return rawdb.NewMemoryDatabase(), nil
@@ -65,7 +59,7 @@ func (ctx *ServiceContext) OpenDatabase(name string, cache int, handles int, nam
 // memory database is returned.
 func (ctx *ServiceContext) OpenDatabaseWithFreezer(name string, cache int, handles int, freezer string, namespace string) (ethdb.Database, error) {
 	if ctx.config.PostgresConfig != nil {
-		return rawdb.NewDatabaseWithCleaner(ctx.config.PostgresConfig)
+		return rawdb.NewDatabaseWithCleaner(ctx.config.PostgresConfig, ctx.config.ResolvePath(name), cache, handles, namespace)
 	}
 	if ctx.config.DataDir == "" {
 		return rawdb.NewMemoryDatabase(), nil

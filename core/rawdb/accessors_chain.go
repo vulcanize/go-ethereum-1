@@ -19,8 +19,9 @@ package rawdb
 import (
 	"bytes"
 	"encoding/binary"
-	"github.com/jmoiron/sqlx"
 	"math/big"
+
+	"github.com/jmoiron/sqlx"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"

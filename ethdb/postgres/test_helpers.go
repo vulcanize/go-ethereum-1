@@ -18,23 +18,34 @@ package postgres
 
 import (
 	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/ethereum/go-ethereum/ethdb/leveldb"
 	"github.com/jmoiron/sqlx"
+	lvldb "github.com/syndtr/goleveldb/leveldb"
+	"github.com/syndtr/goleveldb/leveldb/storage"
 )
 
-// TestDB connect to the testing database
+// PostgresTestDB connect to the testing postgres database
 // DO NOT use a production db for the test db, as it will remove all contents of the public.blocks table
-func TestDB() (*sqlx.DB, error) {
+func PostgresTestDB() (*sqlx.DB, error) {
 	connectStr := "postgresql://localhost:5432/optimism_testing?sslmode=disable"
 	return sqlx.Connect("postgres", connectStr)
 }
 
 // TestDatabase build Database interface on top of Postgres database
 func TestDatabase() (ethdb.Database, *sqlx.DB, error) {
-	db, err := TestDB()
+	pgdb, err := PostgresTestDB()
 	if err != nil {
 		return nil, nil, err
 	}
-	return NewDatabase(db), db, nil
+	db, err := lvldb.Open(storage.NewMemStorage(), nil)
+	if err != nil {
+		return nil, nil, err
+	}
+	return &Database{
+		pgdb:  pgdb,
+		l:     db,
+		lvldb: leveldb.NewFromDB(db),
+	}, pgdb, nil
 }
 
 // ResetTestDB drops all rows in the test db public.blocks table
@@ -53,9 +64,6 @@ func ResetTestDB(db *sqlx.DB) error {
 			err = tx.Commit()
 		}
 	}()
-	if _, err := tx.Exec("TRUNCATE kvstore CASCADE"); err != nil {
-		return err
-	}
 	if _, err := tx.Exec("TRUNCATE headers CASCADE"); err != nil {
 		return err
 	}

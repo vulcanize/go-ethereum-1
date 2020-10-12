@@ -222,12 +222,15 @@ func NewLevelDBDatabaseWithFreezer(file string, cache int, handles int, freezer 
 
 // NewDatabaseWithCleaner creates a persistent key-value database with a
 // background cleaning process removing data below the immutability threshold
-func NewDatabaseWithCleaner(conf *postgres.Config) (ethdb.Database, error) {
+func NewDatabaseWithCleaner(conf *postgres.Config, file string, cache int, handles int, namespace string) (ethdb.Database, error) {
 	db, err := postgres.NewDB(conf)
 	if err != nil {
 		return nil, err
 	}
-	pgethdb := postgres.NewDatabase(db)
+	pgethdb, err := postgres.NewDatabase(db, file, cache, handles, namespace)
+	if err != nil {
+		return nil, err
+	}
 	cleaner, err := NewDBCleaner(pgethdb)
 	if err != nil {
 		return nil, err

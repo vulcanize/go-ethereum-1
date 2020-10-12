@@ -19,8 +19,9 @@ package rawdb
 import (
 	"database/sql"
 	"fmt"
-	"github.com/jmoiron/sqlx"
 	"time"
+
+	"github.com/jmoiron/sqlx"
 
 	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/ethereum/go-ethereum/log"
@@ -44,7 +45,7 @@ const (
 )
 
 type cleaner struct {
-	db     *sqlx.DB
+	db   *sqlx.DB
 	tail uint64
 }
 
@@ -58,14 +59,14 @@ func NewDBCleaner(store ethdb.KeyValueStore) (*cleaner, error) {
 	if err := pgdb.Get(&tailHeight, getTailHeightPgStr); err != nil {
 		if err == sql.ErrNoRows {
 			return &cleaner{
-				db:      pgdb,
+				db:   pgdb,
 				tail: 1,
 			}, nil
 		}
 		return nil, err
 	}
 	return &cleaner{
-		db:      pgdb,
+		db:   pgdb,
 		tail: tailHeight,
 	}, nil
 }
@@ -76,7 +77,7 @@ func (c *cleaner) clean() {
 	for {
 		// TODO: enable smooth shutdown using quit channel
 		select {
-		case <- t.C:
+		case <-t.C:
 			var headHeight uint64
 			if err := c.db.Get(&headHeight, getHeadHeightPgStr); err != nil {
 				if err == sql.ErrNoRows {
@@ -86,7 +87,7 @@ func (c *cleaner) clean() {
 				continue
 			}
 			rangeEnd := c.tail + cleanerBatchLimit
-			if headHeight <= params.ImmutabilityThreshold || rangeEnd > headHeight - params.ImmutabilityThreshold {
+			if headHeight <= params.ImmutabilityThreshold || rangeEnd > headHeight-params.ImmutabilityThreshold {
 				continue
 			}
 			_, err := c.db.Exec(deleteHeadersPgStr, c.tail, rangeEnd)

@@ -93,7 +93,7 @@ func (d *Database) HasAncient(kind string, number uint64) (bool, error) {
 		return false, fmt.Errorf("unexpected ancient kind: %s", kind)
 	}
 	has := new(bool)
-	return *has, d.db.Get(has, pgStr, number)
+	return *has, d.pgdb.Get(has, pgStr, number)
 }
 
 // Ancient satisfies the ethdb.AncientReader interface
@@ -115,14 +115,14 @@ func (d *Database) Ancient(kind string, number uint64) ([]byte, error) {
 		return nil, fmt.Errorf("unexpected ancient kind: %s", kind)
 	}
 	data := new([]byte)
-	return *data, d.db.Get(data, pgStr, number)
+	return *data, d.pgdb.Get(data, pgStr, number)
 }
 
 // Ancients satisfies the ethdb.AncientReader interface
 // Ancients returns the ancient item numbers in the ancient store
 func (d *Database) Ancients() (uint64, error) {
 	num := new(uint64)
-	if err := d.db.Get(num, ancientsPgStr); err != nil {
+	if err := d.pgdb.Get(num, ancientsPgStr); err != nil {
 		if err == sql.ErrNoRows {
 			return 0, nil
 		}
@@ -150,7 +150,7 @@ func (d *Database) AncientSize(kind string) (uint64, error) {
 		return 0, fmt.Errorf("unexpected ancient kind: %s", kind)
 	}
 	size := new(uint64)
-	return *size, d.db.Get(size, ancientSizePgStr, tableName)
+	return *size, d.pgdb.Get(size, ancientSizePgStr, tableName)
 }
 
 // AppendAncient satisfies the ethdb.AncientWriter interface
@@ -159,7 +159,7 @@ func (d *Database) AppendAncient(number uint64, hash, header, body, receipts, td
 	// append in batch
 	var err error
 	if d.ancientTx == nil {
-		d.ancientTx, err = d.db.Beginx()
+		d.ancientTx, err = d.pgdb.Beginx()
 		if err != nil {
 			return err
 		}
@@ -195,7 +195,7 @@ func (d *Database) TruncateAncients(n uint64) error {
 	// truncate in batch
 	var err error
 	if d.ancientTx == nil {
-		d.ancientTx, err = d.db.Beginx()
+		d.ancientTx, err = d.pgdb.Beginx()
 		if err != nil {
 			return err
 		}
