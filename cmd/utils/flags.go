@@ -686,7 +686,7 @@ var (
 		Value: "",
 	}
 
-	// Postgres flags
+	// Postgres ethdb flags
 	PostgresDatastoreFlag = cli.BoolFlag{
 		Name:  "postgres.ethdb",
 		Usage: "Turn on Postgres as the ethdb backing datastore",
@@ -718,17 +718,63 @@ var (
 	}
 	PostgresMaxOpenConnectionsFlag = cli.IntFlag{
 		Name:  "postgres.ethdb.maxopen",
-		Usage: "Max number of open Postgres connections to allow",
+		Usage: "Max number of open Postgres connections to allow to ethdb database",
 		Value: 1024,
 	}
 	PostgresMaxIdleConnectionsFlag = cli.IntFlag{
 		Name:  "postgres.ethdb.maxidle",
-		Usage: "Max number of idle Postgres connections to allow",
+		Usage: "Max number of idle Postgres connections to allow to ethdb database",
 		Value: 32,
 	}
 	PostgresMaxConnLifetimeFlag = cli.DurationFlag{
 		Name:  "postgres.ethdb.maxlifetime",
-		Usage: "Max lifetime for Postgres connections",
+		Usage: "Max lifetime for Postgres connections to ethdb database",
+		Value: 0,
+	}
+
+	// Postgres secondary indexing flags
+	IndexingDatastoreFlag = cli.BoolFlag{
+		Name:  "postgres.indexing",
+		Usage: "Turn on secondary indexing",
+	}
+	IndexingHostnameFlag = cli.StringFlag{
+		Name:  "postgres.indexing.hostname",
+		Usage: "Hostname for the Postgres indexing database",
+		Value: "postgres",
+	}
+	IndexingPortFlag = cli.IntFlag{
+		Name:  "postgres.indexing.port",
+		Usage: "Port for the Postgres indexing database",
+		Value: 5432,
+	}
+	IndexingUserFlag = cli.StringFlag{
+		Name:  "postgres.indexing.user",
+		Usage: "User for the Postgres indexing database",
+		Value: "postgres",
+	}
+	IndexingPasswordFlag = cli.StringFlag{
+		Name:  "postgres.indexing.password",
+		Usage: "Password for the Postgres indexing database",
+		Value: "",
+	}
+	IndexingDatabaseNameFlag = cli.StringFlag{
+		Name:  "postgres.indexing.database",
+		Usage: "Name for the Postgres indexing database",
+		Value: "rollup",
+	}
+	IndexingMaxOpenConnectionsFlag = cli.IntFlag{
+		Name:  "postgres.indexing.maxopen",
+		Usage: "Max number of open Postgres connections to allow to indexing database",
+		Value: 1024,
+	}
+	IndexingMaxIdleConnectionsFlag = cli.IntFlag{
+		Name:  "postgres.indexing.maxidle",
+		Usage: "Max number of idle Postgres connections to allow to indexing database",
+		Value: 32,
+	}
+	IndexingMaxConnLifetimeFlag = cli.DurationFlag{
+		Name:  "postgres.indexing.maxlifetime",
+		Usage: "Max lifetime for Postgres connections to indexing database",
 		Value: 0,
 	}
 )

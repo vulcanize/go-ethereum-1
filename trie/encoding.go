@@ -52,6 +52,12 @@ import "math"
 // COMPACT first nibble: 1111
 // COMPACT key = 1111 1101 1[000 0000], 2 bytes total, where the last 7 bits of the last byte are unused.
 
+
+// BinaryKeyToCompactKey converts a binary key to the compact encoded format
+func BinaryKeyToCompactKey(hex []byte) []byte {
+	return binaryKeyToCompactKey(hex)
+}
+
 // Converts the provided BINARY-encoded key into the COMPACT-encoded format detailed above.
 func binaryKeyToCompactKey(binaryKey []byte) []byte {
 	currentByte := uint8(0)
@@ -83,6 +89,11 @@ func binaryKeyToCompactKey(binaryKey []byte) []byte {
 	returnBytes[returnIndex] = currentByte
 
 	return returnBytes
+}
+
+// CompactKeyToBinaryKey converts a compact encoded path to binary format
+func CompactKeyToBinaryKey(compact []byte) []byte {
+	return compactKeyToBinaryKey(compact)
 }
 
 // Converts the provided key from the COMPACT encoding to the BINARY key format (both specified above).
@@ -183,6 +194,11 @@ func prefixLen(a, b []byte) int {
 }
 
 const binaryKeyTerminator = 2
+
+// HasBinaryKeyTerminator exports hasBinaryKeyTerminator
+func HasBinaryKeyTerminator(binaryKey []byte) bool {
+	return hasBinaryKeyTerminator(binaryKey)
+}
 
 // hasBinaryKeyTerminator returns whether a BINARY encoded key has the terminator flag.
 func hasBinaryKeyTerminator(binaryKey []byte) bool {
