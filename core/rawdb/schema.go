@@ -116,12 +116,12 @@ func encodeBlockNumber(number uint64) []byte {
 
 // headerKeyPrefix = headerPrefix + prefixDelineation + num (uint64 big endian) +  numberDelineation
 func headerKeyPrefix(number uint64) []byte {
-	return append(append(append(headerPrefix, prefixDelineation...), encodeBlockNumber(number)...),  numberDelineation...)
+	return append(append(append(headerPrefix, prefixDelineation...), encodeBlockNumber(number)...), numberDelineation...)
 }
 
 // headerKey = headerPrefix + prefixDelineation + num (uint64 big endian) +  numberDelineation + hash
 func headerKey(number uint64, hash common.Hash) []byte {
-	return append(append(append(append(headerPrefix, prefixDelineation...), encodeBlockNumber(number)...),  numberDelineation...), hash.Bytes()...)
+	return append(append(append(append(headerPrefix, prefixDelineation...), encodeBlockNumber(number)...), numberDelineation...), hash.Bytes()...)
 }
 
 // headerTDKey = headerPrefix + prefixDelineation + num (uint64 big endian) + numberDelineation + hash + prefixDelineation + headerTDSuffix
@@ -141,12 +141,12 @@ func headerNumberKey(hash common.Hash) []byte {
 
 // blockBodyKey = blockBodyPrefix + prefixDelineation + num (uint64 big endian) +  numberDelineation + hash
 func blockBodyKey(number uint64, hash common.Hash) []byte {
-	return append(append(append(append(blockBodyPrefix, prefixDelineation...), encodeBlockNumber(number)...),  numberDelineation...), hash.Bytes()...)
+	return append(append(append(append(blockBodyPrefix, prefixDelineation...), encodeBlockNumber(number)...), numberDelineation...), hash.Bytes()...)
 }
 
 // blockReceiptsKey = blockReceiptsPrefix + prefixDelineation + num (uint64 big endian) +  numberDelineation + hash
 func blockReceiptsKey(number uint64, hash common.Hash) []byte {
-	return append(append(append(append(blockReceiptsPrefix, prefixDelineation...), encodeBlockNumber(number)...),  numberDelineation...), hash.Bytes()...)
+	return append(append(append(append(blockReceiptsPrefix, prefixDelineation...), encodeBlockNumber(number)...), numberDelineation...), hash.Bytes()...)
 }
 
 // txLookupKey = txLookupPrefix + prefixDelineation + hash

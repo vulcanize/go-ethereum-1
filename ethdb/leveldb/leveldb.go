@@ -133,6 +133,13 @@ func New(file string, cache int, handles int, namespace string) (*Database, erro
 	return ldb, nil
 }
 
+// NewFromDB returns a Database from an existing low level leveldb handler
+func NewFromDB(db *leveldb.DB) *Database {
+	return &Database{
+		db: db,
+	}
+}
+
 // Close stops the metrics collection, flushes any pending data to disk and closes
 // all io accesses to the underlying key-value store.
 func (db *Database) Close() error {
@@ -227,7 +234,6 @@ func (db *Database) Path() string {
 func (db *Database) ExposeDB() interface{} {
 	return db.db
 }
-
 
 // meter periodically retrieves internal leveldb counters and reports them to
 // the metrics subsystem.

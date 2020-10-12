@@ -215,7 +215,7 @@ func (db *Database) Len() int {
 }
 
 // ExposeDB exposes underlying db
-func (db *Database) ExposeDB() interface {} {
+func (db *Database) ExposeDB() interface{} {
 	return db.db
 }
 

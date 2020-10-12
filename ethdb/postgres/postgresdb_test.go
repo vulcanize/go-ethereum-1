@@ -23,12 +23,12 @@ import (
 	"github.com/ethereum/go-ethereum/ethdb/dbtest"
 )
 
-func TestLevelDB(t *testing.T) {
+func TestPostgresDB(t *testing.T) {
 	t.Run("DatabaseSuite", func(t *testing.T) {
 		dbtest.TestDatabaseSuite(t, func() ethdb.KeyValueStore {
-			db, _ := TestDB()
+			edb, db, _ := TestDatabase()
 			ResetTestDB(db)
-			return NewDatabase(db)
+			return edb
 		})
 	})
 }
