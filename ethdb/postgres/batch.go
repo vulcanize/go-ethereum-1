@@ -20,21 +20,26 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/jmoiron/sqlx"
+	"github.com/syndtr/goleveldb/leveldb"
 )
 
 // Batch is the type that satisfies the ethdb.Batch interface for PG-IPFS Ethereum data using a direct Postgres connection
 type Batch struct {
 	db          *sqlx.DB
 	tx          *sqlx.Tx
+	lvldb       *leveldb.DB
+	b           *leveldb.Batch
 	valueSize   int
 	replayCache map[string][]byte
 }
 
 // NewBatch returns a ethdb.Batch interface for PG-IPFS
-func NewBatch(db *sqlx.DB, tx *sqlx.Tx) ethdb.Batch {
+func NewBatch(lvl *leveldb.DB, db *sqlx.DB, tx *sqlx.Tx) ethdb.Batch {
 	b := &Batch{
 		db:          db,
 		tx:          tx,
+		lvldb:       lvl,
+		b:           new(leveldb.Batch),
 		replayCache: make(map[string][]byte),
 	}
 	if tx == nil {
@@ -47,19 +52,19 @@ func NewBatch(db *sqlx.DB, tx *sqlx.Tx) ethdb.Batch {
 // Put inserts the given value into the key-value data store
 // Key is expected to be the keccak256 hash of value
 func (b *Batch) Put(key []byte, value []byte) (err error) {
-	prefix, table, num, fk, hash, err := ResolvePutKey(key, value)
+	table, num, fk, hash, err := ResolvePutKey(key, value)
 	if err != nil {
 		return err
+	}
+	if table == KVStore {
+		b.b.Put(key, value)
+		b.valueSize += len(value)
+		return nil
 	}
 	var pgStr string
 	args := make([]interface{}, 0, 3)
 	args = append(args, key, value)
 	switch table {
-	case Undefined:
-		return unsupportedTableTypeErr
-	case KVStore:
-		pgStr = putKVPgStr
-		args = append(args, prefix)
 	case Headers:
 		pgStr = putHeaderPgStr
 		args = append(args, num, hash)
@@ -90,6 +95,8 @@ func (b *Batch) Put(key []byte, value []byte) (err error) {
 		pgStr = putBloomIndexPgStr
 	case TxMeta:
 		pgStr = putTxMetaPgStr
+	default:
+		return unsupportedTableTypeErr
 	}
 	if _, err = b.tx.Exec(pgStr, args...); err != nil {
 		return err
@@ -106,12 +113,13 @@ func (b *Batch) Delete(key []byte) (err error) {
 	if err != nil {
 		return err
 	}
+	if table == KVStore {
+		b.b.Delete(key)
+		b.valueSize++
+		return nil
+	}
 	var pgStr string
 	switch table {
-	case Undefined:
-		return unsupportedTableTypeErr
-	case KVStore:
-		pgStr = deleteKVPgStr
 	case Headers:
 		pgStr = deleteHeaderPgStr
 	case Hashes:
@@ -136,11 +144,14 @@ func (b *Batch) Delete(key []byte) (err error) {
 		pgStr = deleteBloomIndexPgStr
 	case TxMeta:
 		pgStr = deleteTxMetaPgStr
+	default:
+		return unsupportedTableTypeErr
 	}
 	_, err = b.tx.Exec(pgStr, key)
 	if err != nil {
 		return err
 	}
+	b.valueSize++
 	delete(b.replayCache, common.Bytes2Hex(key))
 	return nil
 }
@@ -163,7 +174,7 @@ func (b *Batch) Write() error {
 		return err
 	}
 	b.replayCache = nil
-	return nil
+	return b.lvldb.Write(b.b, nil)
 }
 
 // Replay satisfies the ethdb.Batch interface
@@ -179,7 +190,7 @@ func (b *Batch) Replay(w ethdb.KeyValueWriter) error {
 		}
 	}
 	b.replayCache = nil
-	return nil
+	return b.b.Replay(&replayer{writer: w})
 }
 
 // Reset satisfies the ethdb.Batch interface
@@ -191,6 +202,31 @@ func (b *Batch) Reset() {
 	if err != nil {
 		panic(err)
 	}
+	b.b.Reset()
 	b.replayCache = make(map[string][]byte)
 	b.valueSize = 0
+}
+
+// replayer is a small wrapper to implement the correct replay methods.
+type replayer struct {
+	writer  ethdb.KeyValueWriter
+	failure error
+}
+
+// Put inserts the given value into the key-value data store.
+func (r *replayer) Put(key, value []byte) {
+	// If the replay already failed, stop executing ops
+	if r.failure != nil {
+		return
+	}
+	r.failure = r.writer.Put(key, value)
+}
+
+// Delete removes the key from the key-value data store.
+func (r *replayer) Delete(key []byte) {
+	// If the replay already failed, stop executing ops
+	if r.failure != nil {
+		return
+	}
+	r.failure = r.writer.Delete(key)
 }
